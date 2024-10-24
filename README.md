@@ -201,7 +201,7 @@ Please follow the instructions in the [README](test/README.md) file in [test](./
 * Ability to specify even/odd channels to eject the reads only from these specified channels.
 * Please create issues if you want to see more features that can make RawHash2 easily integratable with nanopore sequencers for any use case.
 
-# Citing RawHash, RawHash2, and RawAlign
+# Citing RawHash, RawHash2, Rawsamble, and RawAlign
 
 If you use RawHash (or RawHash2) in your work, please consider citing the following papers:
 
@@ -233,7 +233,25 @@ If you use RawHash (or RawHash2) in your work, please consider citing the follow
 	year = {2024},
 	pages = {btae478},
 }
+```
 
+If you use Rawsamble (i.e., all-vs-all overlapping functionality integrated in RawHash2) please consider citing the following work along with RawHash and RawHash2: 
+
+```bibtex
+@article{firtina_rawsamble_2024,
+  title = {{Rawsamble: Overlapping and Assembling Raw Nanopore Signals using a Hash-based Seeding Mechanism}},
+  author = {Firtina, Can and Mordig, Maximilian and Mustafa, Harun and Goswami, Sayan and Mansouri Ghiasi, Nika and Mercogliano, Stefano and Eris, Furkan and Lindegger, Joël and Kahles, Andre and Mutlu, Onur},
+  journal = {arXiv},
+  year = {2024},
+  month = oct,
+  doi = {10.48550/arXiv.2410.17801},
+  url = {https://doi.org/10.48550/arXiv.2410.17801},
+}
+```
+
+If you use RawAlign (i.e., the alignment functionality integrated in RawHash2) please consider citing the following work along with RawHash and RawHash2: 
+
+```bibtex
 @article{lindegger_rawalign_2023,
 	title = {{RawAlign}: {Accurate, Fast, and Scalable Raw Nanopore Signal Mapping via Combining Seeding and Alignment}},
 	author = {Lindegger, Joël and Firtina, Can and Ghiasi, Nika Mansouri and Sadrosadati, Mohammad and Alser, Mohammed and Mutlu, Onur},
