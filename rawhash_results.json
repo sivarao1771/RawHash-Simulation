@@ -1,0 +1,18 @@
+{
+  "ref_len":5000,
+  "query_len":500,
+  "signal_len":4960,
+  "offline_total":1247897,
+  "online_total":3246407,
+  "grand_total":4494304,
+  "steps":[
+    {"name":"Kmer-to-Current Table","phase":"OFFLINE","arith":49960,"mem":30991,"compare":4996,"mac":24980,"total":389846},
+    {"name":"Reference Index Build","phase":"OFFLINE","arith":99910,"mem":70364,"compare":4546,"mac":49955,"total":858051},
+    {"name":"Signal Normalization","phase":"ONLINE","arith":24803,"mem":14880,"compare":0,"mac":4960,"total":178563},
+    {"name":"Event Detection","phase":"ONLINE","arith":16368,"mem":10416,"compare":0,"mac":4960,"total":125488},
+    {"name":"Query Minimizers","phase":"ONLINE","arith":4920,"mem":4923,"compare":4947,"mac":2460,"total":61557},
+    {"name":"Seeding","phase":"ONLINE","arith":0,"mem":1,"compare":1,"mac":0,"total":11},
+    {"name":"DTW Alignment","phase":"ONLINE","arith":112500,"mem":261780,"compare":109530,"mac":37500,"total":2877330},
+    {"name":"Chaining & Mapping","phase":"ONLINE","arith":690,"mem":241,"compare":253,"mac":105,"total":3458}
+  ]
+}
