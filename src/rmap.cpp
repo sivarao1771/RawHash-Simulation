@@ -13,6 +13,18 @@
 #include <math.h>
 #include <float.h>  // for FLT_MAX
 
+#ifndef __ac_Wang_hash
+static inline uint32_t __ac_Wang_hash(uint32_t key) {
+    key += ~(key << 15);
+    key ^=  (key >> 10);
+    key +=  (key << 3);
+    key ^=  (key >> 6);
+    key += ~(key << 11);
+    key ^=  (key >> 16);
+    return key;
+}
+#endif
+
 #ifdef PROFILERH
 double ri_filereadtime = 0.0;
 double ri_signaltime = 0.0;
@@ -326,7 +338,7 @@ void ri_map_frag(const ri_idx_t *ri,
 		#else
 		seed_hits = mg_lchain_dp(opt->max_target_gap_length, opt->max_query_gap_length, opt->bw, opt->max_num_skips, 
 								opt->max_chain_iter, opt->min_num_anchors, opt->min_chaining_score, chn_pen_gap,
-								chn_pen_skip, &n_seed_pos, seed_hits, &(reg->prev_anchors), &(reg->n_cregs), &u, b->km);
+								chn_pen_skip, &n_seed_pos, seed_hits, &(reg->prev_anchors), &(reg->n_cregs), &u, b->km,NULL);
 		#endif
 	}else
 		seed_hits = mg_lchain_rmq(max_gap, opt->rmq_inner_dist, opt->bw, opt->max_num_skips, opt->rmq_size_cap,

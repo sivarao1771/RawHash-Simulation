@@ -2,7 +2,10 @@
 #include <vector>
 #include <algorithm>
 #include <assert.h>
+//#include <immintrin.h>
+#ifdef __x86_64__
 #include <immintrin.h>
+#endif
 #include <iomanip>
 #include <limits>
 #include "dtw.h"

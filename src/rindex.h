@@ -135,7 +135,7 @@ ri_idx_t* ri_idx_init(float diff, int b, int w, int e, int n, int q, int k, floa
  * 
  * @return				rindex (index)
  */
-ri_idx_t *ri_idx_reader_read(ri_idx_reader_t *r, ri_pore_t* pore, int n_threads, int io_n_threads = 1);
+ri_idx_t *ri_idx_reader_read(ri_idx_reader_t *r, ri_pore_t* pore, int n_threads, int io_n_threads );
 
 /**
  * Adds the values in an array to the index
@@ -189,6 +189,11 @@ const uint64_t *ri_idx_rev_get(const ri_idx_t *ri, uint64_t hashval, int *n);
 int32_t ri_idx_cal_max_occ(const ri_idx_t *ri, float f);
 
 void ri_mapopt_update(ri_mapopt_t *opt, const ri_idx_t *ri);
+
+#ifdef USE_MEMRISTOR
+void ri_idx_enable_memristor(int threshold);
+void ri_idx_disable_memristor();
+#endif
 
 #ifdef __cplusplus
 }

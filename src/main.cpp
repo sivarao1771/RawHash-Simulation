@@ -6,6 +6,12 @@
 #include "rawhash.h"
 #include "ketopt.h"
 
+#ifdef USE_MEMRISTOR
+extern "C" void ri_idx_enable_memristor(int threshold);
+#endif
+
+extern "C" int rawhash_main(int argc, char** argv);
+
 #define RH_VERSION "2.1"
 
 static ko_longopt_t long_options[] = {
@@ -233,7 +239,7 @@ int ri_mapopt_parse_dtw_fill_method(ri_mapopt_t *opt, char* arg) {
         opt->dtw_fill_method = RI_M_DTW_FILL_METHOD_FULL;
     } else if (strncmp(arg, "banded=", 7) == 0) {
         opt->dtw_fill_method = RI_M_DTW_FILL_METHOD_BANDED;
-        opt->dtw_band_radius_frac = std::atof(arg + 7);
+        opt->dtw_band_radius_frac = atof(arg + 7);
     } else {
         return -1;
     }
@@ -254,6 +260,16 @@ const char* ri_maptopt_dtw_mode_to_string(uint32_t dtw_border_constraint){
 }
 
 int main(int argc, char *argv[])
+{
+#ifdef USE_MEMRISTOR
+    ri_idx_enable_memristor(7);
+    fprintf(stderr, "[MEM] CAM enabled with threshold 7\n");
+#endif
+    return rawhash_main(argc, argv);
+}
+
+
+extern "C" int rawhash_main(int argc, char *argv[])
 {
 	const char *opt_str = "k:d:p:e:q:w:n:o:t:K:x:h";
 	ketopt_t o = KETOPT_INIT;
