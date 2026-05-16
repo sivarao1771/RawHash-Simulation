@@ -293,31 +293,71 @@ void ri_sketch_crossbar(void *km,
                         float fine_range,
                         mm128_v *p,
                         short out)
-{
-	fprintf(stderr, "[MEM] Crossbar LSH called\n");
     // Ignore minimizer (w) and use fixed-step sliding window.
+  {
     if (len < (uint32_t)e) return;
-
     if (!g_crossbar) {
-        g_crossbar = new MemristorCrossbar(e, 64);
+        g_crossbar = new MemristorCrossbar(e, 64, 1.0);
     }
 
     uint32_t span = k + e - 1;
-    const uint64_t id_shift = (uint64_t)id << RI_ID_SHIFT;
+    const uint64_t id_shift   = (uint64_t)id << RI_ID_SHIFT;
+    const uint64_t mask_events    = (1ULL << (quant_bit * e)) - 1;
+    const uint64_t mask_quant_bit = (1ULL << quant_bit) - 1;
+    const uint32_t n_buckets  = 1U << quant_bit;
 
-    rh_kv_resize(mm128_t, km, *p, p->n + len - e + 1);
+    int      sigBufFull = 0;
+    uint32_t f_pos = 0, sigBufPos = 0, l_sigpos = 0;
+    uint64_t quantVal = 0;
 
-    for (uint32_t i = 0; i <= len - e; ++i) {
-        std::vector<float> ev(s_values + i, s_values + i + e);
-        uint64_t hash = g_crossbar->hashToU64(ev);
+    if (!out) rh_kv_resize(mm128_t, km, *p, p->n + len - span - 1);
 
-        mm128_t seed;
-        seed.x = (hash << RI_HASH_SHIFT) | span;
-        seed.y = id_shift | (i << RI_POS_SHIFT) | strand;
+    mm128_t sigBuf[16];   // e <= 16 in practice
+    memset(sigBuf, 0, e * sizeof(mm128_t));
 
-        rh_kv_push(mm128_t, km, *p, seed);
+    // ── helper lambda: unpack quantVal → float vector → crossbar hash ──
+    auto crossbar_hash = [&]() -> uint64_t {
+        std::vector<float> ev(e);
+        uint64_t qv = quantVal;
+        for (int j = e - 1; j >= 0; --j) {
+            ev[j] = (float)(qv & mask_quant_bit);
+            qv >>= quant_bit;
+        }
+        return g_crossbar->hashToU64(ev);
+    };
+
+    // ── first signal position ──────────────────────────────────────────
+    l_sigpos = f_pos;
+    uint32_t fq = dynamic_quantize(s_values[f_pos],
+                                   fine_min, fine_max, fine_range,
+                                   n_buckets) & mask_quant_bit;
+    if (out) fprintf(stdout, "%u", fq);
+    sigBuf[sigBufPos].y = id_shift | (uint32_t)f_pos << RI_POS_SHIFT | strand;
+    if (++sigBufPos == (uint32_t)e) { sigBufFull = 1; sigBufPos = 0; }
+    quantVal = fq & mask_events;
+    sigBuf[sigBufPos].x = (crossbar_hash() << RI_HASH_SHIFT) | span;
+    if (sigBufFull && !out) rh_kv_push(mm128_t, km, *p, sigBuf[sigBufPos]);
+
+    // ── remaining positions ────────────────────────────────────────────
+    for (f_pos = 1; f_pos < len; ++f_pos) {
+        if (fabs(s_values[f_pos] - s_values[l_sigpos]) < diff) continue;
+        l_sigpos = f_pos;
+
+        fq = dynamic_quantize(s_values[f_pos],
+                              fine_min, fine_max, fine_range,
+                              n_buckets) & mask_quant_bit;
+        if (out) fprintf(stdout, ",%u", fq);
+
+        sigBuf[sigBufPos].y = id_shift | (uint32_t)f_pos << RI_POS_SHIFT | strand;
+        if (++sigBufPos == (uint32_t)e) { sigBufFull = 1; sigBufPos = 0; }
+
+        quantVal = (quantVal << quant_bit | fq) & mask_events;
+        sigBuf[sigBufPos].x = (crossbar_hash() << RI_HASH_SHIFT) | span;
+
+        if (!sigBufFull) continue;
+        if (!out) rh_kv_push(mm128_t, km, *p, sigBuf[sigBufPos]);
     }
-	fprintf(stderr, "[MEM] Using crossbar LSH for hashing\n");
+    if (out) fprintf(stdout, "\n");
 }
 #endif
 

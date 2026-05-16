@@ -4,6 +4,7 @@
 #include <vector>
 #include <bitset>
 #include <cstdint>
+#include "memristor_stats.h"
 
 class MemristorCAM {
 public:
@@ -40,6 +41,7 @@ private:
 extern "C" {
 #endif
 int ri_idx_cam_search(uint64_t query_hash, uint64_t* out_metadata, int max_results);
+void ri_idx_cam_program(uint64_t hash_val, uint64_t metadata);
 #ifdef __cplusplus
 }
 #endif

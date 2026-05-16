@@ -4,6 +4,7 @@
 #include <vector>
 #include <random>
 #include <bitset>
+#include "memristor_stats.h"
 
 class MemristorCrossbar {
 public:

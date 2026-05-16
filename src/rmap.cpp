@@ -13,17 +13,6 @@
 #include <math.h>
 #include <float.h>  // for FLT_MAX
 
-#ifndef __ac_Wang_hash
-static inline uint32_t __ac_Wang_hash(uint32_t key) {
-    key += ~(key << 15);
-    key ^=  (key >> 10);
-    key +=  (key << 3);
-    key ^=  (key >> 6);
-    key += ~(key << 11);
-    key ^=  (key >> 16);
-    return key;
-}
-#endif
 
 #ifdef PROFILERH
 double ri_filereadtime = 0.0;

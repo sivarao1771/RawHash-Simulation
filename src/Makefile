@@ -1,10 +1,10 @@
 #pass DEBUG=1 to make to enable debugging
 ifdef DEBUG
-	CFLAGS=-Wall -O2 -fsanitize=address -g -Wc++-compat -march=native -pthread -DHAVE_KALLOC
-	CPPFLAGS=--std=c++11 -Wall -O2 -fsanitize=address -g -march=native -pthread -DHAVE_KALLOC
+	CFLAGS=-Wall -O2 -fsanitize=address -g -Wc++-compat -march=native -pthread -DHAVE_KALLOC -DUSE_MEMRISTOR
+	CPPFLAGS=--std=c++11 -Wall -O2 -fsanitize=address -g -march=native -pthread -DHAVE_KALLOC -DUSE_MEMRISTOR
 else
-	CFLAGS=-Wall -O3 -Wc++-compat -march=native -pthread -DHAVE_KALLOC
-	CPPFLAGS=-std=c++11 -Wall -O3 -march=native -pthread -DHAVE_KALLOC
+	CFLAGS=-Wall -O3 -Wc++-compat -march=native -pthread -DHAVE_KALLOC -DUSE_MEMRISTOR 
+	CPPFLAGS=-std=c++11 -Wall -O3 -march=native -pthread -DHAVE_KALLOC -DUSE_MEMRISTOR 
 endif
 
 #pass PROFILE=1 to make to enable profiling
@@ -13,7 +13,7 @@ ifdef PROFILE
 	CPPFLAGS+=-g -fno-omit-frame-pointer -march=native -DPROFILERH=1
 endif
 
-OBJS= kthread.o kalloc.o bseq.o roptions.o sequence_until.o rutils.o rsig.o revent.o rsketch.o rindex.o lchain.o rseed.o rmap.o dtw.o hit.o main.o
+OBJS= kthread.o kalloc.o bseq.o roptions.o sequence_until.o rutils.o rsig.o revent.o rsketch.o rindex.o lchain.o rseed.o rmap.o dtw.o hit.o main.o memristor_crossbar.o memristor_cam.o memristor_stats.o
 
 CXX_COMPILER_VERSION ?= $(shell $(CXX) -dumpversion)
 SYSTEM_PROCESSOR ?= $(shell uname -m)

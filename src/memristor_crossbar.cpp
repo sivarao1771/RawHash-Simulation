@@ -6,12 +6,15 @@ MemristorCrossbar::MemristorCrossbar(int input_dim, int hash_bits, double conduc
     : input_dim_(input_dim), hash_bits_(hash_bits), rng_(std::random_device{}()) {
 
     conductances_.resize(input_dim_);
-    std::lognormal_distribution<double> dist(0.0, conductance_std);
+    std::normal_distribution<double> dist(0.0, conductance_std);
 
     for (int i = 0; i < input_dim_; ++i) {
         conductances_[i].resize(hash_bits_);
         for (int j = 0; j < hash_bits_; ++j) {
             conductances_[i][j] = dist(rng_);
+            #ifdef USE_MEMRISTOR
+                 g_mem_stats.crossbar_init_cycles.fetch_add(1, std::memory_order_relaxed);
+            #endif
         }
     }
 }
@@ -20,6 +23,12 @@ std::vector<bool> MemristorCrossbar::hash(const std::vector<float>& events) cons
     if ((int)events.size() != input_dim_) {
         throw std::runtime_error("Event vector size does not match crossbar input dimension");
     }
+
+    #ifdef USE_MEMRISTOR
+        g_mem_stats.vmm_read_cycles.fetch_add(1, std::memory_order_relaxed);
+        g_mem_stats.crossbar_comparator_decisions.fetch_add(
+            static_cast<uint64_t>(hash_bits_), std::memory_order_relaxed);
+    #endif
 
     std::vector<bool> result(hash_bits_);
     for (int j = 0; j < hash_bits_; ++j) {

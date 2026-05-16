@@ -11,6 +11,7 @@
 // These functions are implemented in a C++ file with C linkage
 extern void ri_idx_enable_memristor(int threshold);
 extern void ri_idx_disable_memristor(void);
+extern "C" void ri_idx_cam_program(uint64_t hash_val, uint64_t metadata);
 #endif
 
 #ifdef USE_MEMRISTOR
@@ -19,9 +20,6 @@ extern void ri_idx_disable_memristor(void);
 extern "C" int ri_idx_cam_search(uint64_t query_hash, uint64_t* out_metadata, int max_results);
 #endif
 
-#ifdef USE_MEMRISTOR
-extern "C" int ri_idx_cam_search(uint64_t query_hash, uint64_t* out_metadata, int max_results);
-#endif
 
 #if defined(WIN32) || defined(_WIN32)
 #include <io.h> // for open(2)
@@ -109,6 +107,9 @@ void ri_idx_add(ri_idx_t *ri, int n, const mm128_t *a){
 	for (i = 0; i < n; ++i) {
 		mm128_v *p = &ri->B[a[i].x>>RI_HASH_SHIFT&mask].a;
 		rh_kv_push(mm128_t, 0, *p, a[i]);
+		#ifdef USE_MEMRISTOR
+        	ri_idx_cam_program(a[i].x >> RI_HASH_SHIFT, a[i].y);
+		#endif
 		
 	}
 }
@@ -513,8 +514,7 @@ void ri_idx_sort(ri_idx_t *ri, int n_threads){
 const uint64_t *ri_idx_get(const ri_idx_t *ri, uint64_t hashval, int *n){
 	#ifdef USE_MEMRISTOR
     // Query the memristor CAM (approximate search)
-    static std::vector<uint64_t> cam_matches;  // thread_local would be better
-    fprintf(stderr, "[MEM] CAM lookup called\n");
+    static thread_local std::vector<uint64_t> cam_matches;  // thread_local would be better
     cam_matches.clear();
     
     // The CAM stores the full 64‑bit hash (without shifting) as key

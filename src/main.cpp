@@ -2,14 +2,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <chrono>
+#include <cstdlib>
+#include "memristor_cam.h"
 
 #include "rawhash.h"
 #include "ketopt.h"
 
 #ifdef USE_MEMRISTOR
 extern "C" void ri_idx_enable_memristor(int threshold);
+extern "C" void mem_stats_print(const char* phase);
+extern "C" void mem_stats_reset(void);
 #endif
 
+// extern bool ri_idx_enable_memristor;
+// extern bool memristor_cam_lookup(uint64_t key);
 extern "C" int rawhash_main(int argc, char** argv);
 
 #define RH_VERSION "2.1"
@@ -262,7 +269,7 @@ const char* ri_maptopt_dtw_mode_to_string(uint32_t dtw_border_constraint){
 int main(int argc, char *argv[])
 {
 #ifdef USE_MEMRISTOR
-    ri_idx_enable_memristor(7);
+    ri_idx_enable_memristor(25);
     fprintf(stderr, "[MEM] CAM enabled with threshold 7\n");
 #endif
     return rawhash_main(argc, argv);
@@ -633,5 +640,39 @@ extern "C" int rawhash_main(int argc, char *argv[])
 		// for (i = 0; i < argc; ++i) fprintf(stderr, " %s", argv[i]);
 		fprintf(stderr, "\n[M::%s] Real time: %.3f sec; CPU: %.3f sec; Peak RSS: %.3f GB\n", __func__, ri_realtime() - ri_realtime0, ri_cputime(), ri_peakrss() / 1024.0 / 1024.0 / 1024.0);
 	}
+	
+	#ifdef USE_MEMRISTOR
+		mem_stats_print("Indexing + Mapping Pipeline");
+		mem_stats_reset();
+	#endif
+    // ---- CAM Benchmark ----
+
+		// ---- CAM Benchmark ----
+	// extern bool ri_idx_enable_memristor;
+	// extern bool memristor_cam_lookup(uint64_t key);
+	    // ---- CAM Benchmark ----
+    // Check if memristor is enabled (call the function with threshold > 0)
+    // We assume if threshold was set, memristor is active.
+        // ---- CAM Benchmark ----
+       // ---- CAM Benchmark (Real) ----
+
+	#ifdef USE_MEMRISTOR
+		fprintf(stderr, "[BENCH] CAM search benchmark: 1M random queries...\n");
+		const int num_lookups = 1000000;
+		auto bench_start = std::chrono::high_resolution_clock::now();
+		uint64_t dummy_out[10];
+		for (int i = 0; i < num_lookups; i++) {
+			uint64_t key = ((uint64_t)rand() << 32) | rand();
+			int n = ri_idx_cam_search(key, dummy_out, 10);
+			(void)n;
+		}
+		auto bench_end = std::chrono::high_resolution_clock::now();
+		double bench_ms = std::chrono::duration<double, std::milli>(
+							bench_end - bench_start).count();
+		fprintf(stderr, "[BENCH] %d lookups in %.2f ms  (%.2f ns/lookup)\n",
+				num_lookups, bench_ms, (bench_ms * 1e6) / num_lookups);
+		mem_stats_print("CAM Microbenchmark");
+	#endif
+
 	return 0;
 }
